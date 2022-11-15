@@ -1,0 +1,88 @@
+---
+title: "Understanding Italian Administrative Texts: A Reader-oriented Study for Text Readability and Simplification"
+output: html_notebook
+subtitle: "Error Analysis"
+---
+
+```{r}
+
+library(tidyverse)
+library(lme4)
+library(car)
+library(lmerTest)
+library(effects)
+library(interactions)
+library(here)
+```
+Load results of the tree subject groups and merge them in one dataframe.
+```{r}
+here()
+control_path <- here("data", "results_control.csv")
+control <- read.csv(control_path)
+elderly_path <- here("data", "results_elderly.csv")
+elderly <- read.csv(elderly_path)
+l2_path <- here("data", "results_l2.csv")
+l2 <- read.csv(l2_path)
+
+test <- do.call("rbind", list(control, elderly, l2))
+```
+Set reference level on control group
+```{r}
+test$group <- as.factor(test$group)
+test$group <- relevel(test$group,ref="control")
+```
+Scale and center readedu, admin, and digital index
+```{r}
+test <- mutate(test, readedu_centered = scale(readedu), admin_centered = scale(admin),
+               digital_centered= scale(digital))
+```
+Compute the linear mixed model where the percetage of errors is function of complexity, group, readedu index, admin index, digital index (as fixed effects), user, and text (as random effects).
+```{r}
+lmm <- lmer(errors_perc ~ (complexity*group)*(readedu_centered+admin_centered+digital_centered) + (1|user) + (1|text), data = test)
+summary(lmm)
+```
+Plot the three ways interaction between digital index, complexity and group.
+```{r}
+interact_plot(lmm,pred = digital_centered,modx = complexity,  mod2 = group, interval = TRUE,x.label = "Digital Index",y.label = "Error percentage",int.width = .95)
+```
+Set reference level on L2 group
+```{r}
+test$group <- as.factor(test$group)
+test$group <- relevel(test$group,ref="L2")
+```
+Compute the linear mixed model where the percetage of errors is function of complexity, group, readedu index, admin index, digital index (as fixed effects), user, and text (as random effects).
+```{r}
+lmm <- lmer(errors_perc ~ (complexity*group)*(readedu_centered+admin_centered+digital_centered) + (1|user) + (1|text), data = test)
+summary(lmm)
+```
+Plot the two ways interaction between admin index and group.
+```{r}
+interact_plot(lmm,pred = admin_centered,modx =group, interval = TRUE,x.label = "Admin Index",y.label = "Error percentage",int.width = .95)
+```
+
+FOCUS ON L2
+```{r}
+l2_f_path <- here("data", "results_l2_focus.csv")
+l2 <- read_csv(l2_f_path)
+```
+Scale and center certificate level, years in italy, years spent studying Italian, read, edu, readedu, admin, and digital index
+```{r}
+l2 <- mutate(l2, readedu_centered = scale(readedu), read_centered = scale(read),edu_centered = scale(edu), admin_centered = scale(admin),
+             digital_centered= scale(digital),certificate_level_centered = scale(certificate_level), years_in_italy_centered = scale(years_in_italy),years_studying_italian_centered = scale(years_studying_italian))
+```
+Compute the linear mixed model where the percetage of errors is function of complexity, read index, edu index, admin index, digital index (as fixed effects), and user (as random effects).
+```{r}
+lmm <- lmer(errors_perc~ (complexity)*(edu_centered+read_centered+admin_centered+digital_centered+certificate_level_centered+years_in_italy_centered+years_studying_italian_centered) + (1|user) , data = l2)
+summary(lmm)
+
+```
+Plot the two ways interaction between digital index and complexity.
+
+```{r}
+interact_plot(lmm,pred = digital_centered,modx = complexity,  interval = TRUE,x.label = "Digital Index",y.label = "Error percentage",int.width = .95)
+```
+
+
+
+
+

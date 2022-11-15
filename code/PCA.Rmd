@@ -1,0 +1,81 @@
+---
+title: "Understanding Italian Administrative Texts: A Reader-oriented Study for Text Readability and Simplification"
+output: html_notebook
+subtitle: "Principal Component Analysis and Feature Analysis"
+---
+
+```{r}
+
+library(tidyverse)
+library(lme4)
+library(car)
+library(lmerTest)
+library(effects)
+library(interactions)
+library(here)
+```
+Load results of the tree subject groups and merge them in one dataframe.
+```{r}
+here()
+control_path <- here("data", "results_control.csv")
+control <- read.csv(control_path)
+elderly_path <- here("data", "results_elderly.csv")
+elderly <- read.csv(elderly_path)
+l2_path <- here("data", "results_l2.csv")
+l2 <- read.csv(l2_path)
+
+test <- do.call("rbind", list(control, elderly, l2))
+
+```
+Compute the PCA on extracted features from each document 
+```{r}
+set.seed(114)
+test.pca <- prcomp(test[15:27],center = T, scale = T, rank=3)
+summary(test.pca)
+```
+Write PCA loading matrix on file
+```{r}
+out_pca_path <- here("data", "pca.csv")
+write.csv(test.pca$rotation, out_pca_path)
+
+```
+Add PCA results on test dataframe
+```{r}
+
+test$PC1 <- test.pca$x[,1]
+test$PC2 <- test.pca$x[,2]
+
+```
+Set reference level on control group
+```{r}
+test$group <- as.factor(test$group)
+test$group <- relevel(test$group,ref="control")
+```
+Compute the linear mixed model where the percetage of errors is function of group, complexity, PC1,PC2 (as fixed effects), and user (as random effects).
+
+```{r}
+mod_filtered <- lmer(errors_perc ~ (group*complexity)*(PC1 + PC2 ) + (1|user), data = test)
+summary(mod_filtered)
+```
+Set reference level on L2 group
+```{r}
+test$group <- as.factor(test$group)
+test$group <- relevel(test$group,ref="L2")
+```
+Compute the linear mixed model where the percetage of errors is function of group, complexity, PC1,PC2 (as fixed effects), and user (as random effects).
+
+```{r}
+mod_filtered <- lmer(errors_perc ~ (group*complexity)*(PC1 + PC2) + (1|user) , data = test)
+summary(mod_filtered)
+```
+Plot the three ways interaction between PC1, group and complexity.
+
+```{r}
+interact_plot(mod_filtered,pred = PC1,modx =group, mod2=complexity,interval = TRUE,x.label = "Morphological/sentence length related features (PC1)",y.label = "Error percentage",int.width = .95)
+```
+Plot the main effect of PC1 on subject groups.
+
+```{r}
+interact_plot(mod_filtered,pred = PC2,modx =group, interval = TRUE,x.label = "Cohesion/morpho-syntactic related features (PC2)",y.label = "Error percentage",int.width = .95, )
+```
+
