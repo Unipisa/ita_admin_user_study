@@ -13,6 +13,7 @@ library(lmerTest)
 library(effects)
 library(interactions)
 library(here)
+library(jtools)
 ```
 Load results of the tree subject groups and merge them in one dataframe.
 ```{r}
@@ -43,7 +44,7 @@ summary(lmm)
 ```
 Plot the three ways interaction between digital index, complexity and group.
 ```{r}
-interact_plot(lmm,pred = digital_centered,modx = complexity,  mod2 = group, interval = TRUE,x.label = "Digital Index",y.label = "Error percentage",int.width = .95)
+interact_plot(lmm,pred = digital_centered,modx = complexity,  mod2 = group, interval = TRUE,x.label = "Digital Literacy",y.label = "Error percentage",int.width = .95,mod2.labels = c("Control","Elderly","L2"))+theme_apa()
 ```
 Set reference level on L2 group
 ```{r}
@@ -57,7 +58,7 @@ summary(lmm)
 ```
 Plot the two ways interaction between admin index and group.
 ```{r}
-interact_plot(lmm,pred = admin_centered,modx =group, interval = TRUE,x.label = "Admin Index",y.label = "Error percentage",int.width = .95)
+interact_plot(lmm,pred = admin_centered,modx =group, interval = TRUE,x.label = "Admin Index",y.label = "Error percentage",int.width = .95,modx.labels = c('L2','Control','Elderly'))+theme_apa()
 ```
 
 FOCUS ON L2
@@ -79,7 +80,7 @@ summary(lmm)
 Plot the two ways interaction between digital index and complexity.
 
 ```{r}
-interact_plot(lmm,pred = digital_centered,modx = complexity,  interval = TRUE,x.label = "Digital Index",y.label = "Error percentage",int.width = .95)
+interact_plot(lmm,pred = digital_centered,modx = complexity,  interval = TRUE,x.label = "Digital Literacy",y.label = "Error percentage",int.width = .95,modx.labels = c('Complex','Simple'))+theme_apa()
 ```
 
 
