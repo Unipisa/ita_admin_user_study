@@ -13,6 +13,7 @@ library(lmerTest)
 library(effects)
 library(interactions)
 library(here)
+library(jtools)
 ```
 Load results of the tree subject groups and merge them in one dataframe.
 ```{r}
@@ -71,11 +72,11 @@ summary(mod_filtered)
 Plot the three ways interaction between PC1, group and complexity.
 
 ```{r}
-interact_plot(mod_filtered,pred = PC1,modx =group, mod2=complexity,interval = TRUE,x.label = "Morphological/sentence length related features (PC1)",y.label = "Error percentage",int.width = .95)
+interact_plot(mod_filtered,pred = PC1,modx =group, mod2=complexity,interval = TRUE,x.label = "PC1 (Features related to morphology and sentence length)",y.label = "Error percentage",int.width = .95,mod2.labels = c('Complex','Simple'),modx.labels = c('L2','Control','Elderly'))+theme_apa()
 ```
 Plot the main effect of PC1 on subject groups.
 
 ```{r}
-interact_plot(mod_filtered,pred = PC2,modx =group, interval = TRUE,x.label = "Cohesion/morpho-syntactic related features (PC2)",y.label = "Error percentage",int.width = .95, )
+interact_plot(mod_filtered,pred = PC2,modx =group, interval = TRUE,x.label = "PC2 (Features related to cohesion and morpho-syntax)",y.label = "Error percentage",int.width = .95, modx.labels = c('L2','Control','Elderly'))+theme_apa()
 ```
 
